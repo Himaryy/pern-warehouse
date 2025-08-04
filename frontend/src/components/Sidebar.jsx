@@ -15,26 +15,26 @@ import {
 
 const Sidebar = () => {
   return (
-    <aside className="w-64 bg-gray-800 text-white h-screen sticky top-0 flex flex-col px-4">
-      <div className="py-6 text-white text-2xl flex items-center gap-2">
+    <aside className="w-64 bg-gray-800/60 text-white h-screen sticky top-0 flex flex-col px-4">
+      <div className="text-white text-2xl flex items-center gap-2 border-b border-gray-500/50 py-2 pt-6">
         <span>
           <TbBuildingWarehouse />
         </span>{" "}
         StockMaster
       </div>
 
-      <nav className="flex flex-col gap-2">
+      <nav className="flex flex-col gap-2 mt-4">
         {/* Home */}
         <Link
           to={"/"}
-          className="flex items-center gap-2 py-3 px-2 border-b border-gray-400/50 transition-colors hover:border-none rounded-xs duration-500 hover:bg-green-500 hover:rounded-md hover:text-black"
+          className="flex items-center gap-2 py-3 px-2 transition-colors hover:border-none duration-500 hover:bg-green-500 hover:rounded-md hover:text-black"
         >
           <ImHome className="size-5" />
           <div className="font-base">Home</div>
         </Link>
 
         {/* Stock */}
-        <div className="flex items-center justify-start px-2 gap-2 border-b border-gray-400/50">
+        <div className="flex items-center justify-start px-2 gap-2 ">
           <Accordion
             type="single"
             collapsible
@@ -42,7 +42,7 @@ const Sidebar = () => {
             defaultValue="item-1"
           >
             <AccordionItem value="stock-in">
-              <AccordionTrigger className="hover:no-underline">
+              <AccordionTrigger className="hover:no-underline cursor-pointer">
                 <div className="flex gap-2">
                   <GoPackage className="size-5" />
                   <h2 className="text-base">Stocks</h2>
@@ -50,11 +50,12 @@ const Sidebar = () => {
               </AccordionTrigger>
               <AccordionContent>
                 <div className="flex flex-col gap-2">
-                  <Link className="text-base font-semibold pl-6">
+                  <Link
+                    to={"/stock-in"}
+                    className="text-base font-semibold pl-6"
+                  >
                     <div
-                      className={`flex items-center gap-2 hover:bg-green-500 p-2 rounded-md hover:text-black transition-colors duration-500 ${
-                        location.pathname === "/stock-in" ? "bg-green-500" : ""
-                      }`}
+                      className={`flex items-center gap-2 hover:bg-green-500 p-2 rounded-md hover:text-black transition-colors duration-500 `}
                     >
                       <span>
                         <GoPackageDependencies className="size-5" />
@@ -62,11 +63,12 @@ const Sidebar = () => {
                       <div className="font-base">Stock In</div>
                     </div>
                   </Link>
-                  <Link className="text-base font-semibold pl-6">
+                  <Link
+                    to={"/stock-out"}
+                    className="text-base font-semibold pl-6"
+                  >
                     <div
-                      className={`flex items-center gap-2 hover:bg-green-500 p-2 rounded-md hover:text-black transition-colors duration-500 ${
-                        location.pathname === "/stock-out" ? "bg-green-500" : ""
-                      }`}
+                      className={`flex items-center gap-2 hover:bg-green-500 p-2 rounded-md hover:text-black transition-colors duration-500 `}
                     >
                       <span>
                         <GoPackageDependents className="size-5" />
@@ -81,7 +83,10 @@ const Sidebar = () => {
         </div>
 
         {/* Products */}
-        <Link className="flex items-center gap-2 py-3 px-2 border-b border-gray-400/50 transition-colors hover:border-none rounded-xs duration-500 hover:bg-green-500 hover:rounded-md hover:text-black">
+        <Link
+          to={"/products"}
+          className="flex items-center gap-2 py-3 px-2 transition-colors hover:border-none duration-500 hover:bg-green-500 hover:rounded-md hover:text-black"
+        >
           <FaBoxes className="size-5" />
           <div className="font-base">Products</div>
         </Link>
@@ -89,7 +94,7 @@ const Sidebar = () => {
         {/* Suppliers */}
         <Link
           to={"/suppliers"}
-          className="flex items-center gap-2 py-3 px-2 border-b border-gray-400/50 transition-colors hover:border-none rounded-xs duration-500 hover:bg-green-500 hover:rounded-md hover:text-black"
+          className="flex items-center gap-2 py-3 px-2 transition-colors hover:border-none duration-500 hover:bg-green-500 hover:rounded-md hover:text-black"
         >
           <AiOutlineShop className="size-6" />
           <div className="font-base">Suppliers</div>
