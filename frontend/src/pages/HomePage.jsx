@@ -1,9 +1,24 @@
+// @ts-check
+
 import CardInformation from "@/components/CardInformation";
 import ChartInformation from "@/components/ChartInformation";
 import RecentHistory from "@/components/RecentHistory";
-import React from "react";
+import { AppContext } from "@/context/AppContext";
+import React, { useContext } from "react";
 
 const HomePage = () => {
+  const {
+    products = [],
+    stockIn = [],
+    stockOut = [],
+    suppliers = [],
+    summaryStock = [],
+    loading,
+  } = useContext(AppContext);
+
+  if (!products || !stockIn || !stockOut || !suppliers || !summaryStock)
+    return null;
+  console.log(summaryStock);
   return (
     <div className="p-6 space-y-2">
       <div className="space-y-2">
@@ -24,7 +39,13 @@ const HomePage = () => {
         </p>
       </div>
       <div className="py-10 space-y-4 flex flex-col gap-3">
-        <CardInformation />
+        <CardInformation
+          totalProducts={products.length}
+          totalStockIn={stockIn.length}
+          totalStockOut={stockOut.length}
+          totalSuppliers={suppliers.length}
+        />
+        {/* <ChartInformation data={summaryStock} /> */}
         <ChartInformation />
         <RecentHistory />
       </div>

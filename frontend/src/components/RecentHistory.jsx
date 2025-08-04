@@ -4,7 +4,13 @@ import React, { useState } from "react";
 import { ToggleHistory } from "./ToggleHistory";
 import TableHistory from "./TableHistory";
 import { stockIn, stockOut } from "@/lib/constant";
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "./ui/card";
 
 const RecentHistory = () => {
   const [data, setData] = useState("stockIn");
@@ -18,6 +24,9 @@ const RecentHistory = () => {
         <CardTitle className="text-gray-100 font-heading font-semibold">
           Recent History
         </CardTitle>
+        <CardDescription className="text-gray-400">
+          View the latest stock movements in and out of your warehouse.
+        </CardDescription>
       </CardHeader>
 
       <CardContent>

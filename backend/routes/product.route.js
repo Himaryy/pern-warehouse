@@ -26,6 +26,7 @@ import {
   getStockOut,
   updateStockOut,
 } from "../controller/stockOut.controller.js";
+import { SummaryStock } from "../controller/summaryStock.controller.js";
 
 const productRouter = express.Router();
 
@@ -33,7 +34,7 @@ const productRouter = express.Router();
 productRouter.post("/product", addProduct);
 productRouter.patch("/product/:id", updateProduct);
 productRouter.delete("/product/:id", deleteProduct);
-productRouter.get("/product", getProduct);
+productRouter.get("/product/:id", getProduct);
 productRouter.get("/all-product", getAllProducts);
 
 // Stock In and Out
@@ -53,4 +54,7 @@ productRouter.patch("/supplier/:id", updateSupplier);
 productRouter.delete("/supplier/:id", deleteSupplier);
 productRouter.get("/supplier/:id", getSupplier);
 productRouter.get("/all-supplier", getAllSuppliers);
+
+// Summary Stock
+productRouter.get("/summary-stock", SummaryStock);
 export default productRouter;

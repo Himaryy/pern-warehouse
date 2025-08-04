@@ -37,7 +37,7 @@ const chartConfig = {
     // color: "var(--chart-2)",
   },
 };
-
+// {data=[]}
 export default function ChartInformation() {
   return (
     <Card
@@ -56,6 +56,7 @@ export default function ChartInformation() {
         <ChartContainer config={chartConfig} className={`h-64 w-full`}>
           <AreaChart
             accessibilityLayer
+            // data={data}
             data={chartData}
             margin={{ left: 12, right: 12 }}
           >
