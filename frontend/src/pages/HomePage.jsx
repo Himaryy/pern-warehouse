@@ -18,7 +18,6 @@ const HomePage = () => {
 
   if (!products || !stockIn || !stockOut || !suppliers || !summaryStock)
     return null;
-  console.log(summaryStock);
   return (
     <div className="p-6 space-y-2">
       <div className="space-y-2">
@@ -45,9 +44,14 @@ const HomePage = () => {
           totalStockOut={stockOut.length}
           totalSuppliers={suppliers.length}
         />
-        {/* <ChartInformation data={summaryStock} /> */}
-        <ChartInformation />
-        <RecentHistory />
+        <ChartInformation data={summaryStock} />
+        {/* <ChartInformation /> */}
+        <RecentHistory
+          stockIn={stockIn}
+          stockOut={stockOut}
+          products={products}
+          suppliers={suppliers}
+        />
       </div>
     </div>
   );

@@ -8,7 +8,7 @@ export const getAllStockOut = async (req, res) => {
   try {
     const allStockOut = await db
       .select({
-        stockOutId: stockOut.id,
+        id: stockOut.id,
         productId: stockOut.productId,
         productName: products.name,
         quantity: stockOut.quantity,
@@ -18,8 +18,6 @@ export const getAllStockOut = async (req, res) => {
       })
       .from(stockOut)
       .innerJoin(products, eq(stockOut.productId, products.id));
-
-    console.log("Stock Out: ", allStockOut);
 
     return res.status(200).json({
       success: true,
@@ -154,7 +152,8 @@ export const updateStockOut = async (req, res) => {
       .set({
         ...(quantity !== undefined && { quantity }),
         ...(destination && { destination }),
-        ...(status && status === "Pending" && { status }),
+        // ...(status && status === "Pending" && { status }),
+        ...(status && { status }),
         ...(productId && { productId }),
       })
       .where(eq(stockOut.id, id))

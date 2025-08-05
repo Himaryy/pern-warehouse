@@ -57,7 +57,7 @@ export const addStockIn = async (req, res) => {
 
 export const updateStockIn = async (req, res) => {
   const { id } = req.params;
-  const { quantity, suppliersId } = req.body;
+  const { quantity, suppliersId, productId } = req.body;
 
   try {
     if (!id) {
@@ -69,7 +69,7 @@ export const updateStockIn = async (req, res) => {
 
     const updateStock = await db
       .update(stockIn)
-      .set({ quantity, suppliersId })
+      .set({ productId, quantity, suppliersId })
       .where(eq(stockIn.id, id))
       .returning();
 

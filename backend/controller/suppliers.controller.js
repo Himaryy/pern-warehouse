@@ -60,7 +60,6 @@ export const addSupplier = async (req, res) => {
       })
       .returning();
 
-    console.log("New Supplier: ", newSupplier);
     return res.status(200).json({
       success: true,
       data: newSupplier,
@@ -89,8 +88,6 @@ export const updateSupplier = async (req, res) => {
       })
       .where(eq(suppliers.id, id))
       .returning();
-
-    console.log("Update Supplier: ", oldDataSupplier);
 
     return res.status(200).json({
       success: true,

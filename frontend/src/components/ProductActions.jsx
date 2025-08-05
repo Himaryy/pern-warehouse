@@ -14,23 +14,35 @@ import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { Pencil, Plus } from "lucide-react";
 
-export const AddProductDialog = () => {
+export const AddProductDialog = ({
+  products,
+  handleSubmit,
+  form,
+  setForm,
+  openDialog,
+  setOpenDialog,
+}) => {
+  const internalSubmit = (e) => {
+    handleSubmit(e);
+    setOpenDialog(false);
+  };
   return (
-    <Dialog>
-      <form>
-        <DialogTrigger asChild>
-          <Button
-            size="sm"
-            className="bg-green-500 hover:bg-green-600 text-black"
-          >
-            <Plus className="w-4 h-4 mr-1" />
-            Add Product
-          </Button>
-        </DialogTrigger>
-
-        <DialogContent
-          className={`bg-gray-900 text-white border border-gray-700`}
+    <Dialog open={openDialog} onOpenChange={setOpenDialog}>
+      <DialogTrigger asChild>
+        <Button
+          size="sm"
+          onClick={() => setOpenDialog(true)}
+          className="bg-green-500 hover:bg-green-600 text-black"
         >
+          <Plus className="w-4 h-4 mr-1" />
+          Add Product
+        </Button>
+      </DialogTrigger>
+
+      <DialogContent
+        className={`bg-gray-900 text-white border border-gray-700`}
+      >
+        <form onSubmit={internalSubmit}>
           <DialogHeader>
             <DialogTitle className={`text-lg font-semibold`}>
               Tambah Product
@@ -44,10 +56,16 @@ export const AddProductDialog = () => {
                 Nama Product
               </Label>
               <Input
+                value={form?.name}
+                onChange={(e) =>
+                  setForm((val) => ({
+                    ...val,
+                    name: String(e.target.value),
+                  }))
+                }
                 type="text"
                 placeholder="Daging Sapi"
                 className={`bg-gray-800 border-gray-600 text-white mt-1`}
-                autoFocus={false}
               />
             </div>
             <div>
@@ -55,10 +73,15 @@ export const AddProductDialog = () => {
                 Stock Product
               </Label>
               <Input
-                type="number"
+                value={form?.stock}
+                onChange={(e) =>
+                  setForm((val) => ({
+                    ...val,
+                    stock: Number(e.target.value),
+                  }))
+                }
                 placeholder="100"
                 className={`bg-gray-800 border-gray-600 text-white mt-1`}
-                autoFocus={false}
               />
             </div>
           </div>
@@ -70,25 +93,19 @@ export const AddProductDialog = () => {
               Tambah Product
             </Button>
           </div>
-        </DialogContent>
-      </form>
+        </form>
+      </DialogContent>
     </Dialog>
   );
 };
 
-export const EditProductDialog = () => {
+export const EditProductDialog = ({ form, setForm, handleUpdate }) => {
   return (
-    <Dialog>
-      <form>
-        <DialogTrigger asChild>
-          <Button variant="ghost" size="sm" className="text-blue-400">
-            <Pencil className="w-4 h-4" />
-          </Button>
-        </DialogTrigger>
-
-        <DialogContent
-          className={`bg-gray-900 text-white border border-gray-700`}
-        >
+    <>
+      <DialogContent
+        className={`bg-gray-900 text-white border border-gray-700`}
+      >
+        <form onSubmit={handleUpdate}>
           <DialogHeader>
             <DialogTitle className={`text-lg font-semibold`}>
               Edit Product
@@ -102,10 +119,16 @@ export const EditProductDialog = () => {
                 Nama Product
               </Label>
               <Input
+                value={form?.name}
+                onChange={(e) =>
+                  setForm((val) => ({
+                    ...val,
+                    name: String(e.target.value),
+                  }))
+                }
                 type="text"
                 placeholder="Daging Sapi"
                 className={`bg-gray-800 border-gray-600 text-white mt-1`}
-                autoFocus={false}
               />
             </div>
             <div>
@@ -113,7 +136,13 @@ export const EditProductDialog = () => {
                 Stock Product
               </Label>
               <Input
-                type="number"
+                value={form?.stock}
+                onChange={(e) =>
+                  setForm((val) => ({
+                    ...val,
+                    stock: Number(e.target.value),
+                  }))
+                }
                 placeholder="100"
                 className={`bg-gray-800 border-gray-600 text-white mt-1`}
                 autoFocus={false}
@@ -128,13 +157,13 @@ export const EditProductDialog = () => {
               Save
             </Button>
           </div>
-        </DialogContent>
-      </form>
-    </Dialog>
+        </form>
+      </DialogContent>
+    </>
   );
 };
 
-export const DeleteProductDialog = () => {
+export const DeleteProductDialog = ({ handleDelete, productId }) => {
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -152,7 +181,11 @@ export const DeleteProductDialog = () => {
         </DialogHeader>
 
         <div className="flex justify-end">
-          <Button className={`w-15`} variant="destructive">
+          <Button
+            onClick={() => handleDelete(productId)}
+            className={`w-15`}
+            variant="destructive"
+          >
             Ya !
           </Button>
         </div>

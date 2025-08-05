@@ -1,35 +1,41 @@
 // @ts-check
-
-import React, { useEffect, useMemo, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import React from "react";
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
 } from "./ui/table";
-import { DeleteProductDialog, EditProductDialog } from "./ProductActions";
 import { Button } from "./ui/button";
 import { Pencil } from "lucide-react";
+import { ViewDetailStockOut } from "./StockActions";
 
-const TableProduct = ({ rows, products, handleEdit, handleDelete }) => {
+const TableStockOut = ({ rows, products, handleEdit }) => {
   return (
     <>
       <Table>
-        <TableCaption></TableCaption>
         <TableHeader>
-          <TableRow className={`hover:bg-gray-500/30`}>
+          <TableRow>
             <TableHead className="w-12 shrink-0 text-sm text-white">
               No
             </TableHead>
-            <TableHead className="w-10 text-left text-sm text-white">
-              Product Name
+            <TableHead className="w-10 text-center text-sm text-white">
+              Product
             </TableHead>
-            <TableHead className="w-20 shrink-0 text-left text-sm text-white">
-              Stock Product
+            <TableHead className="w-20 shrink-0 text-center text-sm text-white">
+              Qty
+            </TableHead>
+            <TableHead
+              className={`w-40 shrink-0 text-center text-sm text-white`}
+            >
+              Destination
+            </TableHead>
+            <TableHead
+              className={`w-28 shrink-0 text-center text-sm text-white`}
+            >
+              Status
             </TableHead>
             <TableHead
               className={`w-32 shrink-0 text-center text-sm text-white`}
@@ -53,13 +59,18 @@ const TableProduct = ({ rows, products, handleEdit, handleDelete }) => {
                   </TableCell>
                   <TableCell className="max-w-[180px] px-3 py-2">
                     <div className="truncate" title={product?.name ?? "-"}>
-                      {row?.name}
+                      {product?.name}
                     </div>
                   </TableCell>
                   <TableCell className="w-20 px-3 py-2 shrink-0 text-center text-gray-300">
-                    {row?.stock}
+                    {row.quantity}
                   </TableCell>
-
+                  <TableCell className="w-40 px-3 py-2 shrink-0 text-left text-gray-300">
+                    {row?.destination}
+                  </TableCell>
+                  <TableCell className="w-40 px-3 py-2 shrink-0 text-center text-gray-300">
+                    {row?.status}
+                  </TableCell>
                   <TableCell className="w-32 shrink-0 text-right">
                     <div className="flex items-center justify-center space-x-2">
                       <Button
@@ -69,13 +80,11 @@ const TableProduct = ({ rows, products, handleEdit, handleDelete }) => {
                         variant="ghost"
                         size="sm"
                         className="text-blue-400"
+                        disabled={row.status !== "Pending"}
                       >
                         <Pencil className="w-4 h-4" />
                       </Button>
-                      <DeleteProductDialog
-                        handleDelete={handleDelete}
-                        productId={row.id}
-                      />
+                      <ViewDetailStockOut data={row} products={products} />
                     </div>
                   </TableCell>
                 </TableRow>
@@ -87,4 +96,4 @@ const TableProduct = ({ rows, products, handleEdit, handleDelete }) => {
   );
 };
 
-export default TableProduct;
+export default TableStockOut;

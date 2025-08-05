@@ -62,8 +62,6 @@ export const addProduct = async (req, res) => {
       .values({ name, stock })
       .returning();
 
-    console.log("Add Product: ", newProduct);
-
     return res.status(200).json({
       success: true,
       data: newProduct,

@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import { ToggleHistory } from "./ToggleHistory";
 import TableHistory from "./TableHistory";
-import { stockIn, stockOut } from "@/lib/constant";
 import {
   Card,
   CardContent,
@@ -12,10 +11,16 @@ import {
   CardTitle,
 } from "./ui/card";
 
-const RecentHistory = () => {
+const RecentHistory = ({
+  stockIn = [],
+  stockOut = [],
+  products = [],
+  suppliers = [],
+}) => {
   const [data, setData] = useState("stockIn");
 
-  const rows = data === "stockIn" ? stockIn : stockOut;
+  const rows = data === "stockIn" ? stockIn.slice(0, 5) : stockOut.slice(0, 5);
+
   return (
     <Card
       className={`w-full bg-gray-800/60 backdrop-blur border border-gray-700/40 rounded-xl shadow-lg`}
@@ -34,7 +39,12 @@ const RecentHistory = () => {
           <div className="mt-4">
             <ToggleHistory value={data} onValueChange={setData} />
           </div>
-          <TableHistory type={data} rows={rows} />
+          <TableHistory
+            type={data}
+            rows={rows}
+            products={products}
+            suppliers={suppliers}
+          />
         </div>
       </CardContent>
     </Card>

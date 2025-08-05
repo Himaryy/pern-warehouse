@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { TrendingUp } from "lucide-react";
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
 
@@ -18,27 +18,42 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 
-const chartData = [
-  { month: "January", stockIn: 186, stockOut: 80 },
-  { month: "February", stockIn: 305, stockOut: 200 },
-  { month: "March", stockIn: 237, stockOut: 120 },
-  { month: "April", stockIn: 73, stockOut: 190 },
-  { month: "May", stockIn: 209, stockOut: 130 },
-  { month: "June", stockIn: 214, stockOut: 140 },
-];
-
 const chartConfig = {
-  stockIn: {
-    label: "Stock In",
-    // color: "var(--chart-1)",
-  },
   stockOut: {
     label: "Stock Out",
+    // color: "var(--chart-1)",
+  },
+  stockIn: {
+    label: "Stock In",
     // color: "var(--chart-2)",
   },
 };
 // {data=[]}
-export default function ChartInformation() {
+export default function ChartInformation({ data = [] }) {
+  const sorted = useMemo(() => {
+    const monthOrder = {
+      Jan: 1,
+      Feb: 2,
+      Mar: 3,
+      Apr: 4,
+      May: 5,
+      Jun: 6,
+      Jul: 7,
+      Aug: 8,
+      Sep: 9,
+      Oct: 10,
+      Nov: 11,
+      Dec: 12,
+    };
+
+    return [...data].sort((a, b) => {
+      const [aM, aY] = a.month.split("-");
+      const [bM, bY] = b.month.split("-");
+      return (
+        (Number(aY) - Number(bY)) * 100 + (monthOrder[aM] - monthOrder[bM])
+      );
+    });
+  }, [data]);
   return (
     <Card
       className={`w-full bg-gray-800/60 backdrop-blur border border-gray-700/40 rounded-xl shadow-lg`}
@@ -56,8 +71,8 @@ export default function ChartInformation() {
         <ChartContainer config={chartConfig} className={`h-64 w-full`}>
           <AreaChart
             accessibilityLayer
-            // data={data}
-            data={chartData}
+            data={sorted}
+            // data={chartData}
             margin={{ left: 12, right: 12 }}
           >
             {/* <CartesianGrid vertical={false} /> */}
@@ -66,7 +81,7 @@ export default function ChartInformation() {
               tickLine={false}
               axisLine={false}
               tickMargin={8}
-              tickFormatter={(value) => value.slice(0, 3)}
+              tickFormatter={(value) => value}
             />
             <ChartTooltip
               cursor={false}
