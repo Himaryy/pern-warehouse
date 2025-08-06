@@ -10,76 +10,93 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Dialog } from "@/components/ui/dialog";
+import { usePagination } from "@/lib/paginationHooks";
+import PaginationPage from "@/components/PaginationPage";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { AddProductSchema, EditProductSchema } from "@/lib/validations";
 
 const Products = () => {
-  const { products, addProductDB, updateProductDB, deleteProductDB } =
+  const [formMode, setFormMode] = useState("add");
+  const [formData, setFormData] = useState({ id: "", name: "", stock: 0 });
+
+  const { productsContext, addProductDB, updateProductDB, deleteProductDB } =
     useContext(AppContext);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm({
+    resolver: zodResolver(
+      formMode === "add" ? AddProductSchema : EditProductSchema
+    ),
+    defaultValues: formData,
+  });
 
   const [openDialogAdd, setOpenDialogAdd] = useState(false);
   const [productFilter, setProductFilter] = useState("");
   const [debouncedFilter, setDebouncedFilter] = useState("");
   const [selectedRow, setSelectedRow] = useState(null);
 
-  const [formData, setFormData] = useState({
-    id: "",
-    name: "",
-    stock: 0,
-  });
-
   const filteredData = useMemo(() => {
     const query = debouncedFilter.toLowerCase();
 
-    return products.filter(
+    return productsContext.filter(
       (item) =>
         !query ||
         item.id.toLowerCase().includes(query) ||
         item.name.toLowerCase().includes(query)
     );
-  }, [debouncedFilter, products]);
+  }, [debouncedFilter, productsContext]);
 
   const rowMap = useMemo(() => {
     const map = new Map();
-    products.forEach((item) => map.set(item.id, item));
+    productsContext.forEach((item) => map.set(item.id, item));
     return map;
-  }, [products]);
+  }, [productsContext]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    addProductDB(formData);
-    setFormData({
-      id: "",
-      name: "",
-      stock: 0,
-    });
+  const {
+    currentPage,
+    totalPages,
+    paginatedData: paginatedFilteredData,
+    onPageChange,
+  } = usePagination(filteredData, 5);
+
+  const onSubmit = async (data) => {
+    if (formMode === "add") {
+      await addProductDB(data);
+    } else if (formMode === "edit") {
+      await updateProductDB(data);
+    }
+    reset();
+    setFormMode("add");
+    setSelectedRow(null);
+    setFormData({ id: "", name: "", stock: 0 });
+    // setFormMode("add");
   };
 
   const handleEdit = (id) => {
     const selected = rowMap.get(id);
     if (!selected) return null;
 
-    setSelectedRow(id);
-
-    setFormData({
+    setFormMode("edit");
+    reset({
       id: selected.id,
       name: selected.name,
       stock: selected.stock,
     });
+    setSelectedRow(id);
   };
 
-  const handleUpdate = async (e) => {
-    e.preventDefault();
-    updateProductDB(formData);
-    setSelectedRow(null);
-
-    setFormData({
-      id: "",
-      name: "",
-      stock: 0,
-    });
-  };
+  // const handleUpdate = async (data) => {
+  //   updateProductDB(data);
+  //   setSelectedRow(null);
+  //   reset();
+  // };
 
   const handleDelete = async (id) => {
-    // console.log("cek ID", id);
     deleteProductDB(id);
     setSelectedRow(null);
   };
@@ -92,7 +109,13 @@ const Products = () => {
     return () => clearTimeout(timer);
   }, [productFilter]);
 
-  if (!products) return null;
+  useEffect(() => {
+    if (formMode === "edit" && formData.id) {
+      reset(formData);
+    }
+  }, [formMode, formData, reset]);
+
+  if (!productsContext) return null;
 
   return (
     <div className="p-6 space-y-6">
@@ -107,10 +130,10 @@ const Products = () => {
           </p>
         </div>
         <AddProductDialog
-          form={formData}
-          setForm={setFormData}
-          products={products}
+          register={register}
           handleSubmit={handleSubmit}
+          onSubmit={onSubmit}
+          errors={errors}
           openDialog={openDialogAdd}
           setOpenDialog={setOpenDialogAdd}
         />
@@ -147,10 +170,16 @@ const Products = () => {
         <CardContent>
           <div className="flex flex-col gap-2">
             <TableProduct
-              rows={filteredData}
-              products={products}
+              rows={paginatedFilteredData}
+              products={productsContext}
               handleEdit={handleEdit}
               handleDelete={handleDelete}
+            />
+
+            <PaginationPage
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={onPageChange}
             />
 
             <Dialog
@@ -160,9 +189,10 @@ const Products = () => {
               }}
             >
               <EditProductDialog
-                form={formData}
-                setForm={setFormData}
-                handleUpdate={handleUpdate}
+                register={register}
+                handleSubmit={handleSubmit}
+                onSubmit={onSubmit}
+                errors={errors}
               />
             </Dialog>
           </div>

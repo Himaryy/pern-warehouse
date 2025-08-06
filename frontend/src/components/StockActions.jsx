@@ -1,5 +1,5 @@
 // @ts-check
-import React, { useState } from "react";
+import React from "react";
 import {
   Dialog,
   DialogContent,
@@ -9,7 +9,7 @@ import {
   DialogTrigger,
 } from "./ui/dialog";
 import { Button } from "./ui/button";
-import { Eye, Pencil, Plus } from "lucide-react";
+import { Eye, Plus } from "lucide-react";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { FaTrash } from "react-icons/fa";
@@ -22,147 +22,170 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
+import { Controller, useWatch } from "react-hook-form";
 
 export const AddStockInDialog = ({
-  products = [],
-  suppliers = [],
-  // fetchProduts,
-  // fetchSuppliers,
+  register,
   handleSubmit,
-  form,
-  setForm,
+  onSubmit,
+  errors,
   openDialog,
   setOpenDialog,
+  control,
+  products,
+  suppliers,
 }) => {
-  const internalSubmit = (e) => {
-    handleSubmit(e);
+  const internalSubmit = (data) => {
+    onSubmit(data);
     setOpenDialog(false);
   };
+
+  // const selectedProductId = useWatch({
+  //   control,
+  //   name: "productId",
+  // });
+
+  // const selectedProduct = products.find((p) => p.id === selectedProductId);
+  // const selectedSupplier = suppliers.find((p) => p.id === selectedProductId);
+
   return (
-    <Dialog open={openDialog} onOpenChange={setOpenDialog}>
-      <DialogTrigger asChild>
-        <Button
-          size="sm"
-          className="bg-green-500 hover:bg-green-600 text-black"
-          onClick={() => setOpenDialog(true)}
-        >
-          <Plus className="w-4 h-4 mr-1" />
-          New Stock
-        </Button>
-      </DialogTrigger>
-
-      <DialogContent
-        className={`bg-gray-900 text-white border border-gray-700`}
+    <>
+      <Button
+        size="sm"
+        className="bg-green-500 hover:bg-green-600 text-black"
+        onClick={() => setOpenDialog(true)}
       >
-        <form onSubmit={internalSubmit}>
-          <DialogHeader>
-            <DialogTitle className={`text-lg font-semibold`}>
-              Tambah Product
-            </DialogTitle>
-          </DialogHeader>
+        <Plus className="w-4 h-4 mr-1" />
+        New Stock
+      </Button>
 
-          {/* Layout */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <Label htmlFor="productName" className={`text-sm`}>
-                Nama Produk
-              </Label>
-              <Select
-                value={form.productId}
-                onValueChange={(val) =>
-                  setForm((prev) => ({ ...prev, productId: val }))
-                }
+      <Dialog open={openDialog} onOpenChange={setOpenDialog}>
+        <DialogContent
+          className={`bg-gray-900 text-white border border-gray-700`}
+        >
+          <form onSubmit={handleSubmit(internalSubmit)}>
+            <DialogHeader>
+              <DialogTitle className={`text-lg font-semibold`}>
+                Tambah Product
+              </DialogTitle>
+            </DialogHeader>
+
+            {/* Layout */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <Label htmlFor="productName" className={`text-sm`}>
+                  Nama Produk
+                </Label>
+                <Controller
+                  name="productId"
+                  control={control}
+                  render={({ field }) => (
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <SelectTrigger
+                        className={`w-full mt-1 bg-gray-800 border-gray-600 text-white`}
+                      >
+                        <SelectValue placeholder="Pilih Salah Satu:" />
+                      </SelectTrigger>
+
+                      <SelectContent className={`z-50`}>
+                        <SelectGroup>
+                          <SelectLabel>Nama Produk</SelectLabel>
+                          {products.map((product) => (
+                            <SelectItem key={product.id} value={product.id}>
+                              {product?.name}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+                {errors.productId && (
+                  <p className="mt-1 text-sm text-red-400 italic">
+                    {errors.productId.message}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <Label htmlFor="stockProduct" className={`text-sm`}>
+                  Stock Product
+                </Label>
+                <Input
+                  {...register("quantity", { valueAsNumber: true })}
+                  placeholder="100"
+                  className={`bg-gray-800 border-gray-600 text-white mt-1`}
+                />
+                {errors.quantity && (
+                  <p className="mt-1 text-sm text-red-400 italic">
+                    {errors.quantity.message}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <Label htmlFor="supplierName" className={`text-sm`}>
+                  Nama Supplier
+                </Label>
+                <Controller
+                  name="suppliersId"
+                  control={control}
+                  render={({ field }) => (
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <SelectTrigger
+                        className={`w-full mt-1 bg-gray-800 border-gray-600 text-white`}
+                      >
+                        <SelectValue placeholder="Pilih Salah Satu:" />
+                      </SelectTrigger>
+
+                      <SelectContent className={`z-50`}>
+                        <SelectGroup>
+                          <SelectLabel>Nama Produk</SelectLabel>
+                          {suppliers.map((supplier) => (
+                            <SelectItem key={supplier.id} value={supplier.id}>
+                              {supplier?.name}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+                {errors.suppliersId && (
+                  <p className="mt-1 text-sm text-red-400 italic">
+                    {errors.suppliersId.message}
+                  </p>
+                )}
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 mt-6 pt-4">
+              <Button
+                type="submit"
+                className="bg-green-500 text-black hover:bg-green-600"
               >
-                <SelectTrigger
-                  className={`w-full mt-1 bg-gray-800 border-gray-600 text-white`}
-                >
-                  <SelectValue placeholder="Pilih Salah Satu:" />
-                </SelectTrigger>
-
-                <SelectContent className={`z-50`}>
-                  <SelectGroup>
-                    <SelectLabel>Nama Produk</SelectLabel>
-                    {products.map((product) => (
-                      <SelectItem key={product.id} value={product.id}>
-                        {product?.name}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
+                Tambah Product
+              </Button>
             </div>
-
-            <div>
-              <Label htmlFor="stockProduct" className={`text-sm`}>
-                Stock Product
-              </Label>
-              <Input
-                value={form.quantity}
-                onChange={(e) =>
-                  setForm((val) => ({
-                    ...val,
-                    quantity: Number(e.target.value),
-                  }))
-                }
-                placeholder="100"
-                className={`bg-gray-800 border-gray-600 text-white mt-1`}
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="productName" className={`text-sm`}>
-                Nama Supplier
-              </Label>
-              <Select
-                value={form.supplierId}
-                onValueChange={(val) =>
-                  setForm((prev) => ({ ...prev, suppliersId: val }))
-                }
-              >
-                <SelectTrigger
-                  className={`w-full mt-1 bg-gray-800 border-gray-600 text-white`}
-                >
-                  <SelectValue placeholder="Pilih Salah Satu:" />
-                </SelectTrigger>
-
-                <SelectContent className={`z-50`}>
-                  <SelectGroup>
-                    <SelectLabel>Supplier</SelectLabel>
-                    {suppliers.map((supplier) => (
-                      <SelectItem key={supplier.id} value={supplier.id}>
-                        {supplier?.name}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          <div className="flex justify-end gap-2 mt-6 pt-4">
-            <Button
-              type="submit"
-              className="bg-green-500 text-black hover:bg-green-600"
-            >
-              Tambah Product
-            </Button>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>
+          </form>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
 
 export const EditStockInDialog = ({
-  form,
-  setForm,
-  products,
+  register,
+  handleSubmit,
+  onSubmit,
+  errors,
   suppliers,
-  handleUpdate,
+  products,
+  control,
 }) => {
   return (
     <>
       <DialogContent className="bg-gray-900 text-white border-gray-700 ">
-        <form onSubmit={handleUpdate}>
+        <form onSubmit={handleSubmit(onSubmit)}>
           <DialogHeader>
             <DialogTitle>Edit Data Stock In</DialogTitle>
             <DialogDescription>Update information.</DialogDescription>
@@ -173,74 +196,85 @@ export const EditStockInDialog = ({
               <Label htmlFor="SupplierName" className={`pb-2`}>
                 Nama Produk
               </Label>
-              <Select
-                value={form?.productId}
-                onValueChange={(val) =>
-                  setForm((prev) => ({ ...prev, productId: val }))
-                }
-              >
-                <SelectTrigger
-                  className={`w-full mt-1 bg-gray-800 border-gray-600 text-white`}
-                >
-                  <SelectValue placeholder="Pilih Salah Satu:" />
-                </SelectTrigger>
+              <Controller
+                name="productId"
+                control={control}
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger
+                      className={`w-full mt-1 bg-gray-800 border-gray-600 text-white`}
+                    >
+                      <SelectValue placeholder="Pilih Salah Satu:" />
+                    </SelectTrigger>
 
-                <SelectContent className={`z-50`}>
-                  <SelectGroup>
-                    <SelectLabel>Nama Produk</SelectLabel>
-                    {products.map((product) => (
-                      <SelectItem key={product.id} value={product.id}>
-                        {product?.name}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
+                    <SelectContent className={`z-50`}>
+                      <SelectGroup>
+                        <SelectLabel>Nama Produk</SelectLabel>
+                        {products.map((product) => (
+                          <SelectItem key={product.id} value={product.id}>
+                            {product?.name}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+              {errors.productId && (
+                <p className="mt-1 text-sm text-red-400 italic">
+                  {errors.productId.message}
+                </p>
+              )}
             </div>
             <div>
               <Label htmlFor="stock" className="text-sm pb-2">
-                Stock
+                Qty
               </Label>
               <Input
-                value={form?.quantity}
-                onChange={(e) =>
-                  setForm((val) => ({
-                    ...val,
-                    quantity: Number(e.target.value),
-                  }))
-                }
+                {...register("quantity", { valueAsNumber: true })}
                 placeholder="100"
                 className={`bg-gray-800 border-gray-600 text-white mt-1`}
               />
+              {errors.quantity && (
+                <p className="mt-1 text-sm text-red-400 italic">
+                  {errors.quantity.message}
+                </p>
+              )}
             </div>
 
             <div>
-              <Label htmlFor="productName" className={`text-sm`}>
+              <Label htmlFor="supplierName" className={`text-sm`}>
                 Nama Supplier
               </Label>
-              <Select
-                value={form?.suppliersId}
-                onValueChange={(val) =>
-                  setForm((prev) => ({ ...prev, suppliersId: val }))
-                }
-              >
-                <SelectTrigger
-                  className={`w-full mt-1 bg-gray-800 border-gray-600 text-white`}
-                >
-                  <SelectValue placeholder="Pilih Salah Satu:" />
-                </SelectTrigger>
+              <Controller
+                name="suppliersId"
+                control={control}
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger
+                      className={`w-full mt-1 bg-gray-800 border-gray-600 text-white`}
+                    >
+                      <SelectValue placeholder="Pilih Salah Satu:" />
+                    </SelectTrigger>
 
-                <SelectContent className={`z-50`}>
-                  <SelectGroup>
-                    <SelectLabel>Supplier</SelectLabel>
-                    {suppliers.map((supplier) => (
-                      <SelectItem key={supplier.id} value={supplier.id}>
-                        {supplier?.name}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
+                    <SelectContent className={`z-50`}>
+                      <SelectGroup>
+                        <SelectLabel>Nama Supplier</SelectLabel>
+                        {suppliers.map((supplier) => (
+                          <SelectItem key={supplier.id} value={supplier.id}>
+                            {supplier?.name}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+              {errors.suppliersId && (
+                <p className="mt-1 text-sm text-red-400 italic">
+                  {errors.suppliersId.message}
+                </p>
+              )}
             </div>
           </div>
 
@@ -367,15 +401,17 @@ export const ViewDetailStockIn = ({ data, products, suppliers, className }) => {
 };
 
 export const AddStockOutDialog = ({
-  products,
+  register,
   handleSubmit,
-  form,
-  setForm,
+  onSubmit,
+  errors,
   openDialog,
   setOpenDialog,
+  control,
+  products,
 }) => {
-  const internalSubmit = (e) => {
-    handleSubmit(e);
+  const internalSubmit = (data) => {
+    onSubmit(data);
     setOpenDialog(false);
   };
 
@@ -395,7 +431,7 @@ export const AddStockOutDialog = ({
       <DialogContent
         className={`bg-gray-900 text-white border border-gray-700`}
       >
-        <form onSubmit={internalSubmit}>
+        <form onSubmit={handleSubmit(internalSubmit)}>
           <DialogHeader>
             <DialogTitle className={`text-lg font-semibold`}>
               Ajukan Permintaan Barang
@@ -410,46 +446,51 @@ export const AddStockOutDialog = ({
               <Label htmlFor="productName" className={`text-sm`}>
                 Nama Produk
               </Label>
-              <Select
-                value={form.productId}
-                onValueChange={(val) =>
-                  setForm((prev) => ({ ...prev, productId: val }))
-                }
-              >
-                <SelectTrigger
-                  className={`w-full mt-1 bg-gray-800 border-gray-600 text-white`}
-                >
-                  <SelectValue placeholder="Pilih Salah Satu:" />
-                </SelectTrigger>
+              <Controller
+                name="productId"
+                control={control}
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger
+                      className={`w-full mt-1 bg-gray-800 border-gray-600 text-white`}
+                    >
+                      <SelectValue placeholder="Pilih Salah Satu:" />
+                    </SelectTrigger>
 
-                <SelectContent className={`z-50`}>
-                  <SelectGroup>
-                    <SelectLabel>Nama Produk</SelectLabel>
-                    {products.map((product) => (
-                      <SelectItem key={product.id} value={product.id}>
-                        {product?.name}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
+                    <SelectContent className={`z-50`}>
+                      <SelectGroup>
+                        <SelectLabel>Nama Produk</SelectLabel>
+                        {products.map((product) => (
+                          <SelectItem key={product.id} value={product.id}>
+                            {product?.name}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+              {errors.productId && (
+                <p className="mt-1 text-sm text-red-400 italic">
+                  {errors.productId.message}
+                </p>
+              )}
             </div>
 
             <div>
               <Label htmlFor="stockProduct" className={`text-sm`}>
-                Stock Product
+                Qty
               </Label>
               <Input
-                value={form.quantity}
-                onChange={(e) =>
-                  setForm((val) => ({
-                    ...val,
-                    quantity: Number(e.target.value),
-                  }))
-                }
+                {...register("quantity", { valueAsNumber: true })}
                 placeholder="100"
                 className={`bg-gray-800 border-gray-600 text-white mt-1`}
               />
+              {errors.quantity && (
+                <p className="mt-1 text-sm text-red-400 italic">
+                  {errors.quantity.message}
+                </p>
+              )}
             </div>
 
             <div>
@@ -457,46 +498,16 @@ export const AddStockOutDialog = ({
                 Destination
               </Label>
               <Input
-                value={form.destination}
-                onChange={(e) =>
-                  setForm((val) => ({
-                    ...val,
-                    destination: String(e.target.value),
-                  }))
-                }
+                {...register("destination")}
                 placeholder="Office HQ"
                 className={`bg-gray-800 border-gray-600 text-white mt-1`}
               />
+              {errors.destination && (
+                <p className="mt-1 text-sm text-red-400 italic">
+                  {errors.destination.message}
+                </p>
+              )}
             </div>
-
-            {/* <div>
-              <Label htmlFor="status" className={`pb-2`}>
-                Status
-              </Label>
-              <Select
-                value={form?.status}
-                onValueChange={(val) =>
-                  setForm((prev) => ({ ...prev, status: val }))
-                }
-              >
-                <SelectTrigger
-                  className={`w-full mt-1 bg-gray-800 border-gray-600 text-white`}
-                >
-                  <SelectValue placeholder="Pilih Salah Satu:" />
-                </SelectTrigger>
-
-                <SelectContent className={`z-50`}>
-                  <SelectGroup>
-                    <SelectLabel>Status</SelectLabel>
-                    {statusOptions.map((item) => (
-                      <SelectItem key={item.value} value={item.value}>
-                        {item?.label}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </div> */}
           </div>
 
           <div className="flex justify-end gap-2 mt-6 pt-4">
@@ -514,10 +525,12 @@ export const AddStockOutDialog = ({
 };
 
 export const EditStockOutDialog = ({
-  form,
-  setForm,
+  register,
+  handleSubmit,
+  onSubmit,
+  errors,
   products,
-  handleUpdate,
+  control,
 }) => {
   const statusOptions = [
     { label: "Pending", value: "Pending" },
@@ -527,7 +540,7 @@ export const EditStockOutDialog = ({
   return (
     <>
       <DialogContent className="bg-gray-900 text-white border-gray-700 ">
-        <form onSubmit={handleUpdate}>
+        <form onSubmit={handleSubmit(onSubmit)}>
           <DialogHeader>
             <DialogTitle>Edit Data Stock Out</DialogTitle>
             <DialogDescription>Update information.</DialogDescription>
@@ -538,46 +551,51 @@ export const EditStockOutDialog = ({
               <Label htmlFor="namaProduk" className={`pb-2`}>
                 Nama Produk
               </Label>
-              <Select
-                value={form?.productId}
-                onValueChange={(val) =>
-                  setForm((prev) => ({ ...prev, productId: val }))
-                }
-              >
-                <SelectTrigger
-                  className={`w-full mt-1 bg-gray-800 border-gray-600 text-white`}
-                >
-                  <SelectValue placeholder="Pilih Salah Satu:" />
-                </SelectTrigger>
+              <Controller
+                name="productId"
+                control={control}
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger
+                      className={`w-full mt-1 bg-gray-800 border-gray-600 text-white`}
+                    >
+                      <SelectValue placeholder="Pilih Salah Satu:" />
+                    </SelectTrigger>
 
-                <SelectContent className={`z-50`}>
-                  <SelectGroup>
-                    <SelectLabel>Nama Produk</SelectLabel>
-                    {products.map((product) => (
-                      <SelectItem key={product.id} value={product.id}>
-                        {product?.name}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
+                    <SelectContent className={`z-50`}>
+                      <SelectGroup>
+                        <SelectLabel>Nama Produk</SelectLabel>
+                        {products.map((product) => (
+                          <SelectItem key={product.id} value={product.id}>
+                            {product?.name}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+              {errors.productId && (
+                <p className="mt-1 text-sm text-red-400 italic">
+                  {errors.productId.message}
+                </p>
+              )}
             </div>
 
             <div>
               <Label htmlFor="stock" className="text-sm pb-2">
-                Stock
+                Qty
               </Label>
               <Input
-                value={form?.quantity}
-                onChange={(e) =>
-                  setForm((val) => ({
-                    ...val,
-                    quantity: Number(e.target.value),
-                  }))
-                }
+                {...register("quantity", { valueAsNumber: true })}
                 placeholder="100"
                 className={`bg-gray-800 border-gray-600 text-white mt-1`}
               />
+              {errors.quantity && (
+                <p className="mt-1 text-sm text-red-400 italic">
+                  {errors.quantity.message}
+                </p>
+              )}
             </div>
 
             <div>
@@ -585,45 +603,50 @@ export const EditStockOutDialog = ({
                 Destination
               </Label>
               <Input
-                value={form?.destination}
-                onChange={(e) =>
-                  setForm((val) => ({
-                    ...val,
-                    destination: String(e.target.value),
-                  }))
-                }
+                {...register("destination")}
                 placeholder="Office HQ"
                 className={`bg-gray-800 border-gray-600 text-white mt-1`}
               />
+              {errors.destination && (
+                <p className="mt-1 text-sm text-red-400 italic">
+                  {errors.destination.message}
+                </p>
+              )}
             </div>
 
             <div>
               <Label htmlFor="status" className={`pb-2`}>
                 Status
               </Label>
-              <Select
-                value={form?.status}
-                onValueChange={(val) =>
-                  setForm((prev) => ({ ...prev, status: val }))
-                }
-              >
-                <SelectTrigger
-                  className={`w-full mt-1 bg-gray-800 border-gray-600 text-white`}
-                >
-                  <SelectValue placeholder="Pilih Salah Satu:" />
-                </SelectTrigger>
+              <Controller
+                name="status"
+                control={control}
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger
+                      className={`w-full mt-1 bg-gray-800 border-gray-600 text-white`}
+                    >
+                      <SelectValue placeholder="Pilih Salah Satu:" />
+                    </SelectTrigger>
 
-                <SelectContent className={`z-50`}>
-                  <SelectGroup>
-                    <SelectLabel>Status</SelectLabel>
-                    {statusOptions.map((item) => (
-                      <SelectItem key={item.value} value={item.value}>
-                        {item?.label}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
+                    <SelectContent className={`z-50`}>
+                      <SelectGroup>
+                        <SelectLabel>Status</SelectLabel>
+                        {statusOptions.map((item) => (
+                          <SelectItem key={item.value} value={item.value}>
+                            {item?.label}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+              {errors.status && (
+                <p className="mt-1 text-sm text-red-400 italic">
+                  {errors.status.message}
+                </p>
+              )}
             </div>
           </div>
 

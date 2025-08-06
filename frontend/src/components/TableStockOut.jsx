@@ -45,51 +45,49 @@ const TableStockOut = ({ rows, products, handleEdit }) => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {[...rows]
-            .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) // ⬅️ urutkan DESCENDING
-            .map((row, index) => {
-              const product = products.find((p) => p.id === row.productId);
-              return (
-                <TableRow
-                  key={row.id}
-                  className={`text-sm text-white border-b border-gray-700/50 hover:bg-gray-700/40`}
-                >
-                  <TableCell className="w-12 shrink-0 text-gray-300">
-                    {index + 1}
-                  </TableCell>
-                  <TableCell className="max-w-[180px] px-3 py-2">
-                    <div className="truncate" title={product?.name ?? "-"}>
-                      {product?.name}
-                    </div>
-                  </TableCell>
-                  <TableCell className="w-20 px-3 py-2 shrink-0 text-center text-gray-300">
-                    {row.quantity}
-                  </TableCell>
-                  <TableCell className="w-40 px-3 py-2 shrink-0 text-left text-gray-300">
-                    {row?.destination}
-                  </TableCell>
-                  <TableCell className="w-40 px-3 py-2 shrink-0 text-center text-gray-300">
-                    {row?.status}
-                  </TableCell>
-                  <TableCell className="w-32 shrink-0 text-right">
-                    <div className="flex items-center justify-center space-x-2">
-                      <Button
-                        onClick={() => {
-                          handleEdit(row.id); // buka modal di sini
-                        }}
-                        variant="ghost"
-                        size="sm"
-                        className="text-blue-400"
-                        disabled={row.status !== "Pending"}
-                      >
-                        <Pencil className="w-4 h-4" />
-                      </Button>
-                      <ViewDetailStockOut data={row} products={products} />
-                    </div>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
+          {rows.map((row, index) => {
+            const product = products.find((p) => p.id === row.productId);
+            return (
+              <TableRow
+                key={row.id}
+                className={`text-sm text-white border-b border-gray-700/50 hover:bg-gray-700/40`}
+              >
+                <TableCell className="w-12 shrink-0 text-gray-300">
+                  {index + 1}
+                </TableCell>
+                <TableCell className="max-w-[180px] px-3 py-2">
+                  <div className="truncate" title={product?.name ?? "-"}>
+                    {product?.name}
+                  </div>
+                </TableCell>
+                <TableCell className="w-20 px-3 py-2 shrink-0 text-center text-gray-300">
+                  {row.quantity}
+                </TableCell>
+                <TableCell className="w-40 px-3 py-2 shrink-0 text-left text-gray-300">
+                  {row?.destination}
+                </TableCell>
+                <TableCell className="w-40 px-3 py-2 shrink-0 text-center text-gray-300">
+                  {row?.status}
+                </TableCell>
+                <TableCell className="w-32 shrink-0 text-right">
+                  <div className="flex items-center justify-center space-x-2">
+                    <Button
+                      onClick={() => {
+                        handleEdit(row.id); // buka modal di sini
+                      }}
+                      variant="ghost"
+                      size="sm"
+                      className="text-blue-400"
+                      disabled={row.status !== "Pending"}
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </Button>
+                    <ViewDetailStockOut data={row} products={products} />
+                  </div>
+                </TableCell>
+              </TableRow>
+            );
+          })}
         </TableBody>
       </Table>
     </>

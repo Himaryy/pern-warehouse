@@ -1,75 +1,106 @@
 // @ts-check
 
+import PaginationPage from "@/components/PaginationPage";
 import { AddStockInDialog, EditStockInDialog } from "@/components/StockActions";
 import TableStockIn from "@/components/TableStockIn";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { AppContext } from "@/context/AppContext";
+import { usePagination } from "@/lib/paginationHooks";
+import { AddStockInSchema, EditStockInSchema } from "@/lib/validations";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Search } from "lucide-react";
 import React, { useContext, useEffect, useMemo, useState } from "react";
+import { useForm } from "react-hook-form";
 
 const StockIn = () => {
   const {
-    products = [],
-    stockIn = [],
-    stockOut = [],
-    suppliers = [],
+    productsContext = [],
+    stockInContext = [],
+    stockOutContext = [],
+    suppliersContext = [],
     addStockInDB,
     updateStockInDB,
   } = useContext(AppContext);
-  const [productFilter, setProductFilter] = useState("");
-  const [debouncedFilter, setDebouncedFilter] = useState("");
+
+  const [formMode, setFormMode] = useState("add");
   const [formData, setFormData] = useState({
     id: "",
     productId: "",
     suppliersId: "",
     quantity: 0,
   });
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+    control,
+  } = useForm({
+    resolver: zodResolver(
+      formMode === "add" ? AddStockInSchema : EditStockInSchema
+    ),
+    defaultValues: formData,
+  });
+
+  const [productFilter, setProductFilter] = useState("");
+  const [debouncedFilter, setDebouncedFilter] = useState("");
   const [openDialogAdd, setOpenDialogAdd] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
-
-  // Waktu buat input search
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedFilter(productFilter);
-    }, 400); // bisa disesuaikan
-
-    return () => clearTimeout(timer);
-  }, [productFilter]);
 
   const filteredData = useMemo(() => {
     const query = debouncedFilter.toLowerCase();
 
-    return stockIn.filter((r) => {
-      const product = products.find((p) => p.id === r.productId);
+    return stockInContext.filter((r) => {
+      const product = productsContext.find((p) => p.id === r.productId);
       return (
         !query ||
         product?.id.toLowerCase().includes(query) ||
         product?.name.toLowerCase().includes(query)
       );
     });
-  }, [debouncedFilter, stockIn, products]);
-
-  if (!products || !stockIn || !stockOut || !suppliers) return null;
+  }, [debouncedFilter, stockInContext, productsContext]);
 
   const rowMap = useMemo(() => {
     const map = new Map();
-    stockIn.forEach((item) => map.set(item.id, item));
+    stockInContext.forEach((item) => map.set(item.id, item));
     return map;
-  }, [stockIn]);
+  }, [stockInContext]);
+
+  const {
+    currentPage,
+    totalPages,
+    paginatedData: paginatedFilteredData,
+    onPageChange,
+  } = usePagination(filteredData, 5);
 
   // Add stock In
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    await addStockInDB(formData);
-    setFormData({ id: "", productId: "", suppliersId: "", quantity: 0 });
+  const onSubmit = async (data) => {
+    if (formMode === "add") {
+      await addStockInDB(data);
+    } else if (formMode === "edit") {
+      await updateStockInDB(data);
+    }
+
+    reset();
+    setFormMode("add");
+    setSelectedRow(null);
+    setFormData({
+      id: "",
+      productId: "",
+      suppliersId: "",
+      quantity: 0,
+    });
   };
 
   // update stockIn
   const handleEdit = (id) => {
     const selected = rowMap.get(id);
     if (!selected) return;
+
+    setFormMode("edit");
 
     setFormData({
       id: selected.id,
@@ -82,13 +113,36 @@ const StockIn = () => {
   };
 
   // update stock IN nnt kirim db
-  const handleUpdate = async (e) => {
-    e.preventDefault();
-    updateStockInDB(formData);
-    setSelectedRow(null);
-    console.log(formData);
-    setFormData({ id: "", productId: "", suppliersId: "", quantity: 0 });
-  };
+  // const handleUpdate = async (e) => {
+  //   e.preventDefault();
+  //   updateStockInDB(formData);
+  //   setSelectedRow(null);
+
+  //   setFormData({ id: "", productId: "", suppliersId: "", quantity: 0 });
+  // };
+
+  useEffect(() => {
+    if (formMode === "edit" && formData.id) {
+      reset(formData);
+    }
+  }, [formMode, formData, reset]);
+
+  // Waktu buat input search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedFilter(productFilter);
+    }, 400); // bisa disesuaikan
+
+    return () => clearTimeout(timer);
+  }, [productFilter]);
+
+  if (
+    !productsContext ||
+    !stockInContext ||
+    !stockOutContext ||
+    !suppliersContext
+  )
+    return null;
 
   return (
     <div className="p-6 space-y-6 ">
@@ -102,13 +156,15 @@ const StockIn = () => {
           </p>
         </div>
         <AddStockInDialog
-          form={formData}
-          setForm={setFormData}
-          products={products}
-          suppliers={suppliers}
+          register={register}
           handleSubmit={handleSubmit}
+          onSubmit={onSubmit}
+          errors={errors}
           openDialog={openDialogAdd}
           setOpenDialog={setOpenDialogAdd}
+          control={control}
+          products={productsContext}
+          suppliers={suppliersContext}
         />
       </div>
 
@@ -137,9 +193,9 @@ const StockIn = () => {
           <div className="flex flex-col gap-2">
             {/* <TableHistory type="stockIn" rows={filteredData} /> */}
             <TableStockIn
-              rows={filteredData}
-              products={products}
-              suppliers={suppliers}
+              rows={paginatedFilteredData}
+              products={productsContext}
+              suppliers={suppliersContext}
               // form={formData}
               // setForm={setFormData}
               // openDialog={openDialogEdit}
@@ -147,6 +203,13 @@ const StockIn = () => {
               // handleUpdate={handleUpdate}
               handleEdit={handleEdit}
             />
+
+            <PaginationPage
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={onPageChange}
+            />
+
             <Dialog
               open={selectedRow !== null}
               onOpenChange={(open) => {
@@ -154,11 +217,15 @@ const StockIn = () => {
               }}
             >
               <EditStockInDialog
-                form={formData}
-                setForm={setFormData}
-                products={products}
-                suppliers={suppliers}
-                handleUpdate={handleUpdate}
+                register={register}
+                handleSubmit={handleSubmit}
+                onSubmit={onSubmit}
+                errors={errors}
+                control={control}
+                suppliers={suppliersContext}
+                products={productsContext}
+                // openDialog={openDialogAdd}
+                // setOpenDialog={setOpenDialogAdd}
               />
             </Dialog>
           </div>

@@ -22,7 +22,6 @@ const TableStockIn = ({
   // handleUpdate,
   handleEdit,
 }) => {
-  // console.log(rows);
   return (
     <div>
       <Table>

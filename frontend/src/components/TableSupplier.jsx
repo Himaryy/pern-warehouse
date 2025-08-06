@@ -1,7 +1,7 @@
 // @ts-check
 
 import React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { CardContent } from "./ui/card";
 import {
   Table,
   TableBody,
@@ -11,25 +11,14 @@ import {
   TableHeader,
   TableRow,
 } from "./ui/table";
-import { suppliers } from "@/lib/constant";
-import {
-  AddSupplierDialog,
-  DeleteSupplierDialog,
-  EditSupplierDialog,
-} from "./SupplierActions";
+import { DeleteSupplierDialog } from "./SupplierActions";
+import { Button } from "./ui/button";
+import { Pencil } from "lucide-react";
+import PaginationPage from "./PaginationPage";
 
-const TableSupplier = ({ rows }) => {
+const TableSupplier = ({ rows, suppliers, handleEdit, handleDelete }) => {
   return (
-    <Card
-      className={`w-full bg-gray-800/60 backdrop-blur border border-gray-700/40 rounded-xl shadow-lg`}
-    >
-      <CardHeader>
-        <CardTitle className="text-gray-100 font-medium text-right">
-          {/* <span>Suppliers</span> */}
-          <AddSupplierDialog />
-        </CardTitle>
-      </CardHeader>
-
+    <>
       <CardContent>
         <div className="flex flex-col gap-2">
           <div className="">
@@ -60,7 +49,7 @@ const TableSupplier = ({ rows }) => {
               </TableHeader>
               <TableBody>
                 {rows.map((row, index) => {
-                  const supplier = suppliers.find((s) => s.id === row.id);
+                  // const supplier = suppliers.find((s) => s.id === row.id);
                   return (
                     <TableRow
                       key={row.id}
@@ -87,8 +76,20 @@ const TableSupplier = ({ rows }) => {
 
                       <TableCell className="w-32 shrink-0 text-right">
                         <div className="flex items-center justify-center space-x-2">
-                          <EditSupplierDialog />
-                          <DeleteSupplierDialog />
+                          <Button
+                            onClick={() => {
+                              handleEdit(row.id); // buka modal di sini
+                            }}
+                            variant="ghost"
+                            size="sm"
+                            className="text-blue-400"
+                          >
+                            <Pencil className="w-4 h-4" />
+                          </Button>
+                          <DeleteSupplierDialog
+                            handleDelete={handleDelete}
+                            suppliersId={row.id}
+                          />
                         </div>
                       </TableCell>
                     </TableRow>
@@ -99,7 +100,7 @@ const TableSupplier = ({ rows }) => {
           </div>
         </div>
       </CardContent>
-    </Card>
+    </>
   );
 };
 

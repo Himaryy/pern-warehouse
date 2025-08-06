@@ -8,15 +8,20 @@ import React, { useContext } from "react";
 
 const HomePage = () => {
   const {
-    products = [],
-    stockIn = [],
-    stockOut = [],
-    suppliers = [],
-    summaryStock = [],
-    loading,
+    productsContext = [],
+    stockInContext = [],
+    stockOutContext = [],
+    suppliersContext = [],
+    summaryStockContext = [],
   } = useContext(AppContext);
 
-  if (!products || !stockIn || !stockOut || !suppliers || !summaryStock)
+  if (
+    !productsContext ||
+    !stockInContext ||
+    !stockOutContext ||
+    !suppliersContext ||
+    !summaryStockContext
+  )
     return null;
   return (
     <div className="p-6 space-y-2">
@@ -39,18 +44,18 @@ const HomePage = () => {
       </div>
       <div className="py-10 space-y-4 flex flex-col gap-3">
         <CardInformation
-          totalProducts={products.length}
-          totalStockIn={stockIn.length}
-          totalStockOut={stockOut.length}
-          totalSuppliers={suppliers.length}
+          totalProducts={productsContext.length}
+          totalStockIn={stockInContext.length}
+          totalStockOut={stockOutContext.length}
+          totalSuppliers={suppliersContext.length}
         />
-        <ChartInformation data={summaryStock} />
+        <ChartInformation data={summaryStockContext} />
         {/* <ChartInformation /> */}
         <RecentHistory
-          stockIn={stockIn}
-          stockOut={stockOut}
-          products={products}
-          suppliers={suppliers}
+          stockIn={stockInContext}
+          stockOut={stockOutContext}
+          products={productsContext}
+          suppliers={suppliersContext}
         />
       </div>
     </div>

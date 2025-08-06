@@ -2,11 +2,14 @@
 
 import { db } from "../database/db.js";
 import { products } from "../database/schema.js";
-import { eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 
 export const getAllProducts = async (req, res) => {
   try {
-    const allProducts = await db.select().from(products);
+    const allProducts = await db
+      .select()
+      .from(products)
+      .orderBy(desc(products.createdAt));
 
     return res.status(200).json({
       success: true,
@@ -14,7 +17,6 @@ export const getAllProducts = async (req, res) => {
       message: "Data All Products",
     });
   } catch (error) {
-    console.log(error);
     res.status(500).json({
       success: false,
       message: "Internal server error",
@@ -45,7 +47,6 @@ export const getProduct = async (req, res) => {
       message: "Product retrieved successfully",
     });
   } catch (error) {
-    console.log("Error Fetching Data Product");
     return res.status(500).json({
       success: false,
       message: "Internal server errror",
@@ -68,7 +69,6 @@ export const addProduct = async (req, res) => {
       message: "Success Add Product",
     });
   } catch (error) {
-    console.log(error);
     res.status(500).json({
       success: false,
       message: error.message,
@@ -100,7 +100,6 @@ export const updateProduct = async (req, res) => {
       message: "Success Update Product :)",
     });
   } catch (error) {
-    console.log(error);
     res.status(500).json({
       success: false,
       message: error.message,
@@ -119,7 +118,6 @@ export const deleteProduct = async (req, res) => {
       message: "Successfully Delete Product",
     });
   } catch (error) {
-    console.log(error);
     res.status(500).json({
       success: false,
       message: error.message,

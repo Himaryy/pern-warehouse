@@ -1,27 +1,30 @@
 // @ts-check
 
+import PaginationPage from "@/components/PaginationPage";
 import {
   AddStockOutDialog,
   EditStockOutDialog,
-  ViewDetailStockOut,
 } from "@/components/StockActions";
 import TableStockOut from "@/components/TableStockOut";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { AppContext } from "@/context/AppContext";
+import { usePagination } from "@/lib/paginationHooks";
+import { AddStockOutSchema, EditStockOutSchema } from "@/lib/validations";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Search } from "lucide-react";
 import React, { useContext, useEffect, useMemo, useState } from "react";
+import { useForm } from "react-hook-form";
 
 const StockOut = () => {
   const {
-    products = [],
-    stockOut = [],
+    productsContext = [],
+    stockOutContext = [],
     addStockOutDB,
     updateStockOutDB,
   } = useContext(AppContext);
-  const [productFilter, setProductFilter] = useState("");
-  const [debouncedFilter, setDebouncedFilter] = useState("");
+
   const [formData, setFormData] = useState({
     id: "",
     productId: "",
@@ -29,32 +32,60 @@ const StockOut = () => {
     quantity: 0,
     status: "Pending",
   });
+  const [formMode, setFormMode] = useState("add");
 
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+    control,
+  } = useForm({
+    resolver: zodResolver(
+      formMode === "add" ? AddStockOutSchema : EditStockOutSchema
+    ),
+    defaultValues: formData,
+  });
+
+  const [productFilter, setProductFilter] = useState("");
+  const [debouncedFilter, setDebouncedFilter] = useState("");
   const [openDialogAdd, setOpenDialogAdd] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
 
   const filteredData = useMemo(() => {
     const query = debouncedFilter.toLowerCase();
 
-    return stockOut.filter((r) => {
-      const product = products.find((p) => p.id === r.productId);
+    return stockOutContext.filter((r) => {
+      const product = productsContext.find((p) => p.id === r.productId);
       return (
         !query ||
         product?.id.toLowerCase().includes(query) ||
         product?.name.toLowerCase().includes(query)
       );
     });
-  }, [debouncedFilter, stockOut, products]);
+  }, [debouncedFilter, stockOutContext, productsContext]);
 
   const rowMap = useMemo(() => {
     const map = new Map();
-    stockOut.forEach((item) => map.set(item.id, item));
+    stockOutContext.forEach((item) => map.set(item.id, item));
     return map;
-  }, [stockOut]);
+  }, [stockOutContext]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    addStockOutDB(formData);
+  const {
+    currentPage,
+    totalPages,
+    paginatedData: paginatedFilteredData,
+    onPageChange,
+  } = usePagination(filteredData, 5);
+
+  const onSubmit = async (data) => {
+    if (formMode === "add") {
+      await addStockOutDB(data);
+    } else if (formMode === "edit") {
+      await updateStockOutDB(data);
+    }
+    setFormMode("add");
+    setSelectedRow(null);
     setFormData({
       id: "",
       productId: "",
@@ -62,13 +93,14 @@ const StockOut = () => {
       quantity: 0,
       status: "Pending",
     });
-    // console.log(formData);
+    reset();
   };
 
   const handleEdit = (id) => {
     const selected = rowMap.get(id);
     if (!selected) return null;
     setSelectedRow(id);
+    setFormMode("edit");
 
     setFormData({
       id: selected.id,
@@ -79,19 +111,25 @@ const StockOut = () => {
     });
   };
 
-  const handleUpdate = async (e) => {
-    e.preventDefault();
-    updateStockOutDB(formData);
-    // console.log("payload", formData);
-    setSelectedRow(null);
-    setFormData({
-      id: "",
-      productId: "",
-      destination: "",
-      quantity: 0,
-      status: "",
-    });
-  };
+  // const handleUpdate = async (e) => {
+  //   e.preventDefault();
+  //   updateStockOutDB(formData);
+
+  //   setSelectedRow(null);
+  //   setFormData({
+  //     id: "",
+  //     productId: "",
+  //     destination: "",
+  //     quantity: 0,
+  //     status: "",
+  //   });
+  // };
+
+  useEffect(() => {
+    if (formMode === "edit" && formData.id) {
+      reset(formData);
+    }
+  }, [formMode, formData, reset]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -101,7 +139,7 @@ const StockOut = () => {
     return () => clearTimeout(timer);
   }, [productFilter]);
 
-  if (!products || !stockOut) return null;
+  if (!productsContext || !stockOutContext) return null;
 
   return (
     <div className="p-6 space-y-6 ">
@@ -116,12 +154,14 @@ const StockOut = () => {
           </p>
         </div>
         <AddStockOutDialog
-          form={formData}
-          setForm={setFormData}
-          products={products}
+          register={register}
           handleSubmit={handleSubmit}
+          onSubmit={onSubmit}
+          errors={errors}
           openDialog={openDialogAdd}
           setOpenDialog={setOpenDialogAdd}
+          control={control}
+          products={productsContext}
         />
       </div>
 
@@ -149,9 +189,15 @@ const StockOut = () => {
         <CardContent>
           <div className="flex flex-col gap-2">
             <TableStockOut
-              rows={filteredData}
-              products={products}
+              rows={paginatedFilteredData}
+              products={productsContext}
               handleEdit={handleEdit}
+            />
+
+            <PaginationPage
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={onPageChange}
             />
 
             <Dialog
@@ -161,11 +207,12 @@ const StockOut = () => {
               }}
             >
               <EditStockOutDialog
-                key={formData.id}
-                form={formData}
-                setForm={setFormData}
-                products={products}
-                handleUpdate={handleUpdate}
+                register={register}
+                handleSubmit={handleSubmit}
+                onSubmit={onSubmit}
+                errors={errors}
+                control={control}
+                products={productsContext}
               />
             </Dialog>
           </div>

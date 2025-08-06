@@ -2,7 +2,7 @@
 
 import { db } from "../database/db.js";
 import { products, stockOut } from "../database/schema.js";
-import { eq, sql } from "drizzle-orm";
+import { desc, eq, sql } from "drizzle-orm";
 
 export const getAllStockOut = async (req, res) => {
   try {
@@ -17,7 +17,8 @@ export const getAllStockOut = async (req, res) => {
         createdAt: stockOut.createdAt,
       })
       .from(stockOut)
-      .innerJoin(products, eq(stockOut.productId, products.id));
+      .innerJoin(products, eq(stockOut.productId, products.id))
+      .orderBy(desc(stockOut.createdAt));
 
     return res.status(200).json({
       success: true,
@@ -57,7 +58,6 @@ export const getStockOut = async (req, res) => {
       message: "Data Stock Out Product retrieved succesfully",
     });
   } catch (error) {
-    console.log("Error Fetching Data Stock Out");
     return res.status(500).json({
       success: false,
       message: "Internal server errror",
@@ -115,7 +115,6 @@ export const addStockOut = async (req, res) => {
       data: newStockOut,
     });
   } catch (error) {
-    console.log("Error Fetching Data Product");
     return res.status(500).json({
       success: false,
       message: "Internal server errror",
@@ -255,7 +254,6 @@ export const approveStockOut = async (req, res) => {
       data: result,
     });
   } catch (error) {
-    console.log(error);
     return res.status(500).json({
       success: false,
       message: "Internal server error",

@@ -9,29 +9,44 @@ import {
   DialogTrigger,
 } from "./ui/dialog";
 import { Button } from "./ui/button";
-import { Pencil, Plus } from "lucide-react";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { FaTrash } from "react-icons/fa";
+import { Plus } from "lucide-react";
 
-export const AddSupplierDialog = () => {
+export const AddSupplierDialog = ({
+  register,
+  handleSubmit,
+  onSubmit,
+  errors,
+  openDialog,
+  setOpenDialog,
+}) => {
+  const internalSubmit = (data) => {
+    onSubmit(data);
+    setOpenDialog(false);
+  };
   return (
-    <Dialog>
+    <Dialog open={openDialog} onOpenChange={setOpenDialog}>
       <DialogTrigger asChild>
         <Button
-          className={`bg-green-500 hover:bg-green-600 text-black font-medium`}
+          size="sm"
+          className="bg-green-500 hover:bg-green-600 text-black"
+          onClick={() => setOpenDialog(true)}
         >
           <Plus className="w-4 h-4 mr-1" />
-          Add Supplier
+          Tambah Supplier
         </Button>
       </DialogTrigger>
 
       <DialogContent
         className={`bg-gray-900 text-white border border-gray-700 max-w-md`}
       >
-        <form>
+        <form onSubmit={handleSubmit(internalSubmit)}>
           <DialogHeader>
-            <DialogTitle>New Supplier ?</DialogTitle>
+            <DialogTitle className={`text-lg font-semibold`}>
+              New Supplier ?
+            </DialogTitle>
             <DialogDescription>
               Enter the supplier details to add them to your warehouse list.
             </DialogDescription>
@@ -43,24 +58,36 @@ export const AddSupplierDialog = () => {
                 Name
               </Label>
               <Input
+                {...register("name")}
                 id="name"
                 name="name"
                 required
-                placeholder="PT. Daging Indonesia"
+                placeholder="PT. Azco"
                 className="bg-gray-800 border-gray-600 text-white"
               />
+              {errors.name && (
+                <p className="mt-1 text-sm text-red-400 italic">
+                  {errors.name.message}
+                </p>
+              )}
             </div>
             <div>
               <Label htmlFor="address" className="text-sm pb-2">
                 Address
               </Label>
               <Input
+                {...register("address")}
                 id="address"
                 name="address"
                 required
                 placeholder="Jl. Sudirman No. 123"
                 className="bg-gray-800 border-gray-600 text-white"
               />
+              {errors.address && (
+                <p className="mt-1 text-sm text-red-400 italic">
+                  {errors.address.message}
+                </p>
+              )}
             </div>
 
             <div>
@@ -68,12 +95,18 @@ export const AddSupplierDialog = () => {
                 Phone
               </Label>
               <Input
+                {...register("phoneNumber")}
                 id="phoneNumber"
                 name="phoneNumber"
                 required
                 placeholder="+62 8123456789"
                 className="bg-gray-800 border-gray-600 text-white"
               />
+              {errors.phoneNumber && (
+                <p className="mt-1 text-sm text-red-400 italic">
+                  {errors.phoneNumber.message}
+                </p>
+              )}
             </div>
           </div>
 
@@ -91,17 +124,16 @@ export const AddSupplierDialog = () => {
   );
 };
 
-export const EditSupplierDialog = () => {
+export const EditSupplierDialog = ({
+  register,
+  handleSubmit,
+  onSubmit,
+  errors,
+}) => {
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button variant="ghost" size="sm" className="text-blue-400">
-          <Pencil className="w-4 h-4" />
-        </Button>
-      </DialogTrigger>
-
+    <>
       <DialogContent className="bg-gray-900 text-white border-gray-700 max-w-md">
-        <form>
+        <form onSubmit={handleSubmit(onSubmit)}>
           <DialogHeader>
             <DialogTitle>Edit Supplier</DialogTitle>
             <DialogDescription>
@@ -115,37 +147,55 @@ export const EditSupplierDialog = () => {
                 Name
               </Label>
               <Input
+                {...register("name")}
                 id="name"
                 name="name"
                 required
-                placeholder="PT. Daging Indonesia"
+                placeholder="PT. Azko"
                 className="bg-gray-800 border-gray-600 text-white"
               />
+              {errors.name && (
+                <p className="mt-1 text-sm text-red-400 italic">
+                  {errors.name.message}
+                </p>
+              )}
             </div>
             <div>
               <Label htmlFor="address" className="text-sm pb-2">
                 Address
               </Label>
               <Input
+                {...register("address")}
                 id="address"
                 name="address"
                 required
                 placeholder="Jl. Sudirman No. 123"
                 className="bg-gray-800 border-gray-600 text-white"
               />
+              {errors.address && (
+                <p className="mt-1 text-sm text-red-400 italic">
+                  {errors.address.message}
+                </p>
+              )}
             </div>
 
             <div>
               <Label htmlFor="phoneNumber" className="text-sm pb-2">
-                Phone
+                Phone Number
               </Label>
               <Input
+                {...register("phoneNumber")}
                 id="phoneNumber"
                 name="phoneNumber"
                 required
                 placeholder="+62 8123456789"
                 className="bg-gray-800 border-gray-600 text-white"
               />
+              {errors.phoneNumber && (
+                <p className="mt-1 text-sm text-red-400 italic">
+                  {errors.phoneNumber.message}
+                </p>
+              )}
             </div>
           </div>
 
@@ -159,11 +209,11 @@ export const EditSupplierDialog = () => {
           </div>
         </form>
       </DialogContent>
-    </Dialog>
+    </>
   );
 };
 
-export const DeleteSupplierDialog = () => {
+export const DeleteSupplierDialog = ({ handleDelete, suppliersId }) => {
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -181,7 +231,11 @@ export const DeleteSupplierDialog = () => {
         </DialogHeader>
 
         <div className="flex justify-end">
-          <Button className={`w-15`} variant="destructive">
+          <Button
+            onClick={() => handleDelete(suppliersId)}
+            className={`w-15`}
+            variant="destructive"
+          >
             Ya !
           </Button>
         </div>

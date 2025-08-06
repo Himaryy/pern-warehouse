@@ -2,11 +2,14 @@
 
 import { db } from "../database/db.js";
 import { products, stockIn } from "../database/schema.js";
-import { eq, sql } from "drizzle-orm";
+import { desc, eq, sql } from "drizzle-orm";
 
 export const getAllStockIn = async (req, res) => {
   try {
-    const allStockIn = await db.select().from(stockIn);
+    const allStockIn = await db
+      .select()
+      .from(stockIn)
+      .orderBy(desc(stockIn.createdAt));
 
     return res.status(200).json({
       success: true,
@@ -14,7 +17,6 @@ export const getAllStockIn = async (req, res) => {
       message: "Data All Stock In",
     });
   } catch (error) {
-    console.log(error);
     res.status(500).json({
       success: false,
       message: "Internal server error",
@@ -47,7 +49,6 @@ export const addStockIn = async (req, res) => {
       message: "Stock in recorded and stock product updated",
     });
   } catch (error) {
-    console.log(error);
     res.status(500).json({
       success: false,
       message: error.message,
@@ -86,7 +87,6 @@ export const updateStockIn = async (req, res) => {
       message: "Success Update Stock :)",
     });
   } catch (error) {
-    console.log(error);
     res.status(500).json({
       success: false,
       message: error.message,

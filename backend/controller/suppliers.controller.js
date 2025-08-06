@@ -2,11 +2,14 @@
 
 import { db } from "../database/db.js";
 import { suppliers } from "../database/schema.js";
-import { eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 
 export const getAllSuppliers = async (req, res) => {
   try {
-    const allSuppliers = await db.select().from(suppliers);
+    const allSuppliers = await db
+      .select()
+      .from(suppliers)
+      .orderBy(desc(suppliers.createdAt));
 
     return res.status(200).json({
       success: true,
@@ -14,7 +17,6 @@ export const getAllSuppliers = async (req, res) => {
       message: "All Suppliers",
     });
   } catch (error) {
-    console.log(error);
     res.status(500).json({
       success: false,
       message: "Internal server error",
@@ -66,7 +68,6 @@ export const addSupplier = async (req, res) => {
       message: "Success Add Supplier",
     });
   } catch (error) {
-    console.log(error);
     res.status(500).json({
       success: false,
       message: error.message,
@@ -95,7 +96,6 @@ export const updateSupplier = async (req, res) => {
       message: "Success Update Suplier ;)",
     });
   } catch (error) {
-    console.log(error);
     res.status(500).json({
       success: false,
       message: error.message,
@@ -114,7 +114,6 @@ export const deleteSupplier = async (req, res) => {
       message: "Successfully Delete Supplier",
     });
   } catch (error) {
-    console.log(error);
     res.status(500).json({
       success: false,
       message: error.message,

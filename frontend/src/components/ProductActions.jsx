@@ -9,103 +9,105 @@ import {
   DialogTrigger,
 } from "./ui/dialog";
 import { Button } from "./ui/button";
-import { FaEdit, FaTrash } from "react-icons/fa";
+import { FaTrash } from "react-icons/fa";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
-import { Pencil, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 
 export const AddProductDialog = ({
-  products,
+  register,
   handleSubmit,
-  form,
-  setForm,
+  onSubmit,
+  errors,
   openDialog,
   setOpenDialog,
 }) => {
-  const internalSubmit = (e) => {
-    handleSubmit(e);
+  const internalSubmit = (data) => {
+    onSubmit(data);
     setOpenDialog(false);
   };
   return (
-    <Dialog open={openDialog} onOpenChange={setOpenDialog}>
-      <DialogTrigger asChild>
-        <Button
-          size="sm"
-          onClick={() => setOpenDialog(true)}
-          className="bg-green-500 hover:bg-green-600 text-black"
-        >
-          <Plus className="w-4 h-4 mr-1" />
-          Add Product
-        </Button>
-      </DialogTrigger>
-
-      <DialogContent
-        className={`bg-gray-900 text-white border border-gray-700`}
+    <>
+      <Button
+        size="sm"
+        onClick={() => setOpenDialog(true)}
+        className="bg-green-500 hover:bg-green-600 text-black"
       >
-        <form onSubmit={internalSubmit}>
-          <DialogHeader>
-            <DialogTitle className={`text-lg font-semibold`}>
-              Tambah Product
-            </DialogTitle>
-          </DialogHeader>
+        <Plus className="w-4 h-4 mr-1" />
+        Add Product
+      </Button>
+      <Dialog open={openDialog} onOpenChange={setOpenDialog}>
+        <DialogContent
+          className={`bg-gray-900 text-white border border-gray-700`}
+        >
+          <form onSubmit={handleSubmit(internalSubmit)}>
+            <DialogHeader>
+              <DialogTitle className={`text-lg font-semibold`}>
+                Tambah Product
+              </DialogTitle>
+            </DialogHeader>
 
-          {/* Layout */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <Label htmlFor="productName" className={`text-sm`}>
-                Nama Product
-              </Label>
-              <Input
-                value={form?.name}
-                onChange={(e) =>
-                  setForm((val) => ({
-                    ...val,
-                    name: String(e.target.value),
-                  }))
-                }
-                type="text"
-                placeholder="Daging Sapi"
-                className={`bg-gray-800 border-gray-600 text-white mt-1`}
-              />
+            {/* Layout */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <Label htmlFor="productName" className={`text-sm`}>
+                  Nama Product
+                </Label>
+                <Input
+                  {...register("name")}
+                  type="text"
+                  placeholder="Daging Sapi"
+                  className={`bg-gray-800 border-gray-600 text-white mt-1`}
+                />
+                {errors.name && (
+                  <p className="mt-1 text-sm text-red-400 italic">
+                    {errors.name.message}
+                  </p>
+                )}
+              </div>
+              <div>
+                <Label htmlFor="stockProduct" className={`text-sm`}>
+                  Stock Product
+                </Label>
+                <Input
+                  {...register("stock", { valueAsNumber: true })}
+                  placeholder="100"
+                  className={`bg-gray-800 border-gray-600 text-white mt-1`}
+                />
+                {errors.stock && (
+                  <p className="mt-1 text-sm text-red-400 italic">
+                    {errors.stock.message}
+                  </p>
+                )}
+              </div>
             </div>
-            <div>
-              <Label htmlFor="stockProduct" className={`text-sm`}>
-                Stock Product
-              </Label>
-              <Input
-                value={form?.stock}
-                onChange={(e) =>
-                  setForm((val) => ({
-                    ...val,
-                    stock: Number(e.target.value),
-                  }))
-                }
-                placeholder="100"
-                className={`bg-gray-800 border-gray-600 text-white mt-1`}
-              />
+            <div className="flex justify-end gap-2 mt-6 pt-4">
+              <Button
+                type="submit"
+                className="bg-green-500 text-black hover:bg-green-600"
+              >
+                Tambah Product
+              </Button>
             </div>
-          </div>
-          <div className="flex justify-end gap-2 mt-6 pt-4">
-            <Button
-              type="submit"
-              className="bg-green-500 text-black hover:bg-green-600"
-            >
-              Tambah Product
-            </Button>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>
+          </form>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
 
-export const EditProductDialog = ({ form, setForm, handleUpdate }) => {
+export const EditProductDialog = ({
+  register,
+  handleSubmit,
+  onSubmit,
+  errors,
+}) => {
   return (
     <>
       <DialogContent
         className={`bg-gray-900 text-white border border-gray-700`}
       >
-        <form onSubmit={handleUpdate}>
+        <form onSubmit={handleSubmit(onSubmit)}>
           <DialogHeader>
             <DialogTitle className={`text-lg font-semibold`}>
               Edit Product
@@ -119,34 +121,32 @@ export const EditProductDialog = ({ form, setForm, handleUpdate }) => {
                 Nama Product
               </Label>
               <Input
-                value={form?.name}
-                onChange={(e) =>
-                  setForm((val) => ({
-                    ...val,
-                    name: String(e.target.value),
-                  }))
-                }
+                {...register("name")}
                 type="text"
                 placeholder="Daging Sapi"
                 className={`bg-gray-800 border-gray-600 text-white mt-1`}
               />
+              {errors.name && (
+                <p className="mt-1 text-sm text-red-400 italic">
+                  {errors.name.message}
+                </p>
+              )}
             </div>
             <div>
               <Label htmlFor="stockProduct" className={`text-sm`}>
                 Stock Product
               </Label>
               <Input
-                value={form?.stock}
-                onChange={(e) =>
-                  setForm((val) => ({
-                    ...val,
-                    stock: Number(e.target.value),
-                  }))
-                }
+                {...register("stock", { valueAsNumber: true })}
                 placeholder="100"
                 className={`bg-gray-800 border-gray-600 text-white mt-1`}
                 autoFocus={false}
               />
+              {errors.stock && (
+                <p className="mt-1 text-sm text-red-400 italic">
+                  {errors.stock.message}
+                </p>
+              )}
             </div>
           </div>
           <div className="flex justify-end gap-2 mt-6 pt-4">
