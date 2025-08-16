@@ -127,41 +127,52 @@ export const updateStockOut = async (req, res) => {
   const { quantity, destination, status, productId } = req.body;
 
   try {
-    const [oldDataStockOut] = await db
-      .select()
-      .from(stockOut)
-      .where(eq(stockOut.id, id));
+    const updateStock = await db.transaction(async (trx) => {
+      const [oldData] = await trx
+        .select({
+          productId: stockOut.productId,
+          quantity: stockOut.quantity,
+          destination: stockOut.destination,
+          status: stockOut.status,
+        })
+        .from(stockOut)
+        .where(eq(stockOut.id, id))
+        .limit(1);
 
-    if (!oldDataStockOut) {
-      return res.status(404).json({
-        success: false,
-        message: "Data Stock Out Not Found",
-      });
-    }
+      if (!oldData) throw new Error("Record stock out not found");
 
-    if (oldDataStockOut.status !== "Pending") {
-      return res.status(400).json({
-        success: false,
-        message: "Cannot Update, already approved or rejected",
-      });
-    }
+      const {
+        productId: oldProductId,
+        quantity: oldQuantity,
+        status: oldStatus,
+        // destination: oldDestionation,
+      } = oldData;
 
-    const [updatedData] = await db
-      .update(stockOut)
-      .set({
-        ...(quantity !== undefined && { quantity }),
-        ...(destination && { destination }),
-        // ...(status && status === "Pending" && { status }),
-        ...(status && { status }),
-        ...(productId && { productId }),
-      })
-      .where(eq(stockOut.id, id))
-      .returning();
+      // decrease product if status us Approved
+      const isApproved = status === "Approved" && oldStatus !== "Approved";
+
+      if (isApproved) {
+        await trx
+          .update(products)
+          .set({ stock: sql`${products.stock} - ${oldQuantity}` })
+          .where(eq(products.id, oldProductId));
+      }
+
+      // update stock out
+
+      const [updatedStock] = await trx
+        .update(stockOut)
+        .set({ productId, quantity, destination, status })
+        .where(eq(stockOut.id, id))
+        .returning();
+
+      return updatedStock;
+    });
 
     return res.status(200).json({
       success: true,
-      data: updatedData,
-      message: "Data Stock Out Updated",
+      message: "Berhasil mengupdate stock out",
+      data: updateStock,
     });
   } catch (error) {
     console.error("Update error:", error);

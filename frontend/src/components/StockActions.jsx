@@ -55,7 +55,7 @@ export const AddStockInDialog = ({
         className="bg-green-500 hover:bg-green-600 text-black"
         onClick={() => setOpenDialog(true)}
       >
-        <Plus className="w-4 h-4 mr-1" />
+        <Plus className="w-4 h-4 mr-1 " />
         New Stock
       </Button>
 

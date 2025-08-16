@@ -20,8 +20,12 @@ const Products = () => {
   const [formMode, setFormMode] = useState("add");
   const [formData, setFormData] = useState({ id: "", name: "", stock: 0 });
 
-  const { productsContext, addProductDB, updateProductDB, deleteProductDB } =
-    useContext(AppContext);
+  const {
+    productsContext = [],
+    addProductDB,
+    updateProductDB,
+    deleteProductDB,
+  } = useContext(AppContext);
 
   const {
     register,

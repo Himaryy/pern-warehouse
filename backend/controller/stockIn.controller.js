@@ -60,31 +60,75 @@ export const updateStockIn = async (req, res) => {
   const { id } = req.params;
   const { quantity, suppliersId, productId } = req.body;
 
+  if (!id) {
+    return res.status(404).json({
+      success: false,
+      message: "Id Product Not Found",
+    });
+  }
   try {
-    if (!id) {
-      return res.status(404).json({
-        success: false,
-        message: "Id Product Not Found",
-      });
-    }
+    const updateStock = db.transaction(async (trx) => {
+      // Get old Data
+      const [oldData] = await trx
+        .select({
+          productId: stockIn.productId,
+          quantity: stockIn.quantity,
+          suppliersId: stockIn.suppliersId,
+        })
+        .from(stockIn)
+        .where(eq(stockIn.id, id))
+        .limit(1);
 
-    const updateStock = await db
-      .update(stockIn)
-      .set({ productId, quantity, suppliersId })
-      .where(eq(stockIn.id, id))
-      .returning();
+      if (!oldData) {
+        throw new Error("Record stock In not found");
+      }
 
-    if (updateStock.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: "Invalid Stock Data",
-      });
-    }
+      const {
+        productId: oldProductId,
+        quantity: oldQuantity,
+        suppliersId: oldSuppliersId,
+      } = oldData;
 
+      // Calculate Qty
+      const diffQty = (quantity ?? oldQuantity) - oldQuantity; // will 0 if no changes
+
+      // if Quantity changes
+      if (diffQty !== 0 || productId !== oldProductId) {
+        // Decrease old stock
+        if (oldProductId) {
+          await trx
+            .update(products)
+            .set({ stock: sql`${products.stock} - ${oldQuantity}` })
+            .where(eq(products.id, oldProductId));
+        }
+
+        // increase new stock
+        if (productId) {
+          await trx
+            .update(products)
+            .set({ stock: sql`${products.stock} + ${quantity ?? oldQuantity}` })
+            .where(eq(products.id, productId));
+        }
+
+        // Update data stock in
+      }
+      const latestUpdate = {};
+      if (productId !== undefined) latestUpdate.productId = productId;
+      if (quantity !== undefined) latestUpdate.quantity = quantity;
+      if (suppliersId !== undefined) latestUpdate.suppliersId = suppliersId;
+
+      const [updatedData] = await trx
+        .update(stockIn)
+        .set(latestUpdate)
+        .where(eq(stockIn.id, id))
+        .returning();
+
+      return updatedData;
+    });
     return res.status(200).json({
       success: true,
+      message: "Data successfully updated",
       data: updateStock,
-      message: "Success Update Stock :)",
     });
   } catch (error) {
     res.status(500).json({
