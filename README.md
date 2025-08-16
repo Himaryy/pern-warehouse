@@ -27,6 +27,11 @@ A simple warehouse management system for CRUD operations, monitoring stock in/ou
 - 🚂 Express.js
 - 🐘 PostgreSQL
 - 🧪 Drizzle ORM
-- 🐳 Docker (for PostgreSQL container)
+- ⚡ Supabase
 
 ---
+
+```bash
+DATABASE_URL=
+VITE_BASE_URL=
+```
