@@ -3,6 +3,11 @@ import productRouter from "./routes/product.route.js";
 import cors from "cors";
 // @ts-check
 
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://stockmaster-psi.vercel.app",
+];
+
 const PORT = 3000;
 const init = () => {
   const app = express();
@@ -10,10 +15,15 @@ const init = () => {
   app.use(
     cors({
       credentials: true,
-      origin: ["https://stockmaster-psi.vercel.app", "http://localhost:5173"],
+      origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+          callback(null, true);
+        } else {
+          callback(new Error("Not allowed by CORS"));
+        }
+      },
     })
   );
-
   app.use("/", productRouter);
 
   app.listen(PORT, () => {
