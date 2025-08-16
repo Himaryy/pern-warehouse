@@ -10,7 +10,7 @@ const init = () => {
   app.use(
     cors({
       credentials: true,
-      origin: "http://localhost:5173",
+      origin: ["https://stockmaster-psi.vercel.app", "http://localhost:5173"],
     })
   );
 
